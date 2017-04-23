@@ -10,7 +10,7 @@ This week our goal was to read IMU data from the arduino, pass it through the pi
 
 First, we learned about the neato’s software structure, as shown in the diagram below.
 
-![System Diagram](/images/logo.png)
+![System Diagram](/images/system.png)
 
 The IMU has an ATmega 328P microcontroller, which is flashed with the Arduino bootloader. This communicates with the raspi through an FTDI USB-UART converter. On the raspi there is code to read from the arduino through serial and send the data through a web socket to the laptop. 
 
@@ -18,8 +18,6 @@ We were in charge of writing the bridge that takes the data sent from the raspi 
 
 In that process, first we learned about UDP and TCP communication protocols. We decided to establish a connection between the raspi and laptop with TCP and then use the IP of the laptop address to send the data packets in UDP. The advantage of UDP should have been that it sends the entire data in one pack, but that wasn’t the case for us, so we had to write our own receive all function. 
 After some more editing the code we were able to publish the IMU data to ROS! 
-
-As shown in this gif below:
 
 ![IMU to ROS](media/imu_visulization_2.gif)
 
