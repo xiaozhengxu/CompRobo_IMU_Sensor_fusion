@@ -1,4 +1,4 @@
-# CompRobo_IMU_Sensor_fusion
+# IMU Sensor Fusion
 This is our final project for Computational Robotics class to incorporate a razor IMU sensor to improve the neato's wheel odometry. 
 
 Link to website:
@@ -23,7 +23,7 @@ After some more editing the code we were able to publish the IMU data to ROS!
 
 We also changed imu_node.py to follow an object oriented code architecture. 
 
-In order to get odometry and IMU data at the same time, we are required to run a bunch of ROS nodes all at the same time, a perfect use case for launch files! Our launch file takes a “host” argument which we pass to the launch structure from the neato node to establish the standard connection to the robot. We also start up our IMU node, which established the connection between the raspi and IMU, then begins publishing data. We briefly experimented with also starting a Robot Pose EKF node, but decided that the point of this project is to learn about Kalman filters, not just use one that is already built. 
+In order to get odometry and IMU data at the same time, we are required to run a bunch of ROS nodes all at the same time, a perfect use case for launch files! Our launch file takes a `host` argument which we pass to the launch structure from the neato node to establish the standard connection to the robot. We also start up our IMU node, which established the connection between the raspi and IMU, then begins publishing data. We briefly experimented with also starting a Robot Pose EKF node, but decided that the point of this project is to learn about Kalman filters, not just use one that is already built. 
 
 We had some issues running both the neato node and IMU node at the same time, which resulted in the serial communication to both the neato and IMU failing. We’re currently resolving this by plugging in the IMU after we have started up the neato. 
 
