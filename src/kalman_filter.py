@@ -84,7 +84,6 @@ class KalmanFilter(object):
             self.sigma_sq = (1-K_t)*(self.sigma_sq+self.world.sigma_m_sq)
 
 
-
 if __name__ == '__main__':
     node = KalmanFilter()
     node.run()
