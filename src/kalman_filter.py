@@ -25,11 +25,20 @@ from simple_filter.cfg import SimpleKalmanConfig
 from sensor_msgs.msg import Imu
 from nav_msgs.msg import Odometry
 
-from tf.transformations import quaternion_from_euler
+from tf.transformations import quaternion_from_euler, rotation_matrix, quaternion_from_matrix
 from dynamic_reconfigure.server import Server
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
 
-class SimpleKalmanFilter(object):
+def convert_pose_to_xy_and_theta(pose):
+    """ Convert pose (geometry_msgs.Pose) to a (x,y,yaw) tuple """
+    orientation_tuple = (pose.orientation.x,
+                         pose.orientation.y,
+                         pose.orientation.z,
+                         pose.orientation.w)
+    angles = euler_from_quaternion(orientation_tuple)
+    return (pose.position.x, pose.position.y, angles[2])
+
+class KalmanFilter(object):
     """ A Kalman filter node that estimates a single state x_t using noisy position measurements """
 
     def __init__(self):
@@ -49,7 +58,16 @@ class SimpleKalmanFilter(object):
         self.pub = rospy.Publisher('combined_odom', Imu, queue_size=1)
 
         # Set up substriber to imu and odom
+        self.imu_sub = rospy.Subscriber('imu',Imu, self.imu_callback)
+        self.odom_sub = rospy.Subscriber('odom',Odometry, self.odom_callback)
+
         srv = Server(SimpleKalmanConfig, self.config_callback)
+
+    def imu_callback(self):
+    	pass
+
+    def odom_callback(self):
+    	pass
 
     def config_callback(self, config, level):
         """ Get the pause_time, movement noise, and measurement noise """
@@ -60,45 +78,13 @@ class SimpleKalmanFilter(object):
 
     def run(self):
         while not rospy.is_shutdown():
-            # Graph new observation from the system
-            z_t = self.world.get_z_t()
-            self.graphs = self.plot_pdf(z_t)
-
             # Do Kalman updates
             K_t = (self.sigma_sq + self.world.sigma_m_sq)/(self.sigma_sq + self.world.sigma_m_sq + self.world.sigma_z_sq)
             self.mu = self.mu + K_t*(z_t - self.mu)
             self.sigma_sq = (1-K_t)*(self.sigma_sq+self.world.sigma_m_sq)
-            plt.pause(self.pause_time)
-            self.graphs = self.plot_pdf(z_t)
 
-            # sample next state
-            self.world.get_x_t()
-            plt.pause(self.pause_time)
 
-    def plot_pdf(self, z):
-        """ Plot the Gaussian PDF with the specified mean (mu) and variance (sigma_sq)
-            x_true is the true system state which will be plotted in blue
-            z is the current observation which will be plotted in red """
-        xs = arange(min(-5,z-2,self.world.x_true-2), max(5,z+2,self.world.x_true+2), .005)
-        p_of_x = [1./sqrt(2*pi*self.sigma_sq)*e**(-(x - self.mu)**2/(2*self.sigma_sq)) for x in xs]
-        plt.xlim([min(xs), max(xs)])
-        if self.graphs:
-            self.graphs[0].set_xdata(xs)
-            self.graphs[0].set_ydata(p_of_x)
-            self.graphs[1].set_xdata(self.world.x_true)
-            self.graphs[2].set_xdata(z)
-        else:
-            self.graphs = []
-            self.graphs.append(plt.plot(xs, p_of_x)[0])
-            self.graphs.append(plt.plot(self.world.x_true, 0,'b.')[0])
-            self.graphs.append(plt.plot(z, 0,'r.')[0])
-            self.graphs[1].set_markersize(20)
-            self.graphs[2].set_markersize(20)
-            plt.ylim([0, 5])
-            plt.legend(('probability density','true position','measured position'))
-        plt.show(False)
-        return self.graphs
 
 if __name__ == '__main__':
-    node = SimpleKalmanFilter()
+    node = KalmanFilter()
     node.run()
