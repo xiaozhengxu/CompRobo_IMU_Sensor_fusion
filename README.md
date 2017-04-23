@@ -21,7 +21,7 @@ After some more editing the code we were able to publish the IMU data to ROS!
 
 As shown in this gif below:
 
-![IMU to ROS](/media/imu_visualization_2.gif)
+![IMU to ROS](media/imu_visualization_2.gif)
 
 We also changed imu_node.py to follow an object oriented code architecture. 
 
