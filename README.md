@@ -10,7 +10,7 @@ This week our goal was to read IMU data from the arduino, pass it through the pi
 
 First, we learned about the neato’s software structure, as shown in the diagram below.
 
-![System Diagram](/images/system.png)
+![System Diagram](media/system.png)
 
 The IMU has an ATmega 328P microcontroller, which is flashed with the Arduino bootloader. This communicates with the raspi through an FTDI USB-UART converter. On the raspi there is code to read from the arduino through serial and send the data through a web socket to the laptop. 
 
