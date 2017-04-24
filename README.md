@@ -1,4 +1,4 @@
-# CompRobo_IMU_Sensor_fusion
+# IMU Sensor Fusion
 This is our final project for Computational Robotics class to incorporate a razor IMU sensor to improve the neato's wheel odometry. 
 
 Link to website:
@@ -10,7 +10,7 @@ This week our goal was to read IMU data from the arduino, pass it through the pi
 
 First, we learned about the neato’s software structure, as shown in the diagram below.
 
-![System Diagram](/images/logo.png)
+![System Diagram](media/system.png)
 
 The IMU has an ATmega 328P microcontroller, which is flashed with the Arduino bootloader. This communicates with the raspi through an FTDI USB-UART converter. On the raspi there is code to read from the arduino through serial and send the data through a web socket to the laptop. 
 
@@ -19,13 +19,11 @@ We were in charge of writing the bridge that takes the data sent from the raspi 
 In that process, first we learned about UDP and TCP communication protocols. We decided to establish a connection between the raspi and laptop with TCP and then use the IP of the laptop address to send the data packets in UDP. The advantage of UDP should have been that it sends the entire data in one pack, but that wasn’t the case for us, so we had to write our own receive all function. 
 After some more editing the code we were able to publish the IMU data to ROS! 
 
-As shown in this gif below:
-
 ![IMU to ROS](media/imu_visulization_2.gif)
 
 We also changed imu_node.py to follow an object oriented code architecture. 
 
-In order to get odometry and IMU data at the same time, we are required to run a bunch of ROS nodes all at the same time, a perfect use case for launch files! Our launch file takes a “host” argument which we pass to the launch structure from the neato node to establish the standard connection to the robot. We also start up our IMU node, which established the connection between the raspi and IMU, then begins publishing data. We briefly experimented with also starting a Robot Pose EKF node, but decided that the point of this project is to learn about Kalman filters, not just use one that is already built. 
+In order to get odometry and IMU data at the same time, we are required to run a bunch of ROS nodes all at the same time, a perfect use case for launch files! Our launch file takes a `host` argument which we pass to the launch structure from the neato node to establish the standard connection to the robot. We also start up our IMU node, which established the connection between the raspi and IMU, then begins publishing data. We briefly experimented with also starting a Robot Pose EKF node, but decided that the point of this project is to learn about Kalman filters, not just use one that is already built. 
 
 We had some issues running both the neato node and IMU node at the same time, which resulted in the serial communication to both the neato and IMU failing. We’re currently resolving this by plugging in the IMU after we have started up the neato. 
 
