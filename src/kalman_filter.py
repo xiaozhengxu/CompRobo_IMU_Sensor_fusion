@@ -154,10 +154,11 @@ class KalmanFilter(object):
             odom.pose.pose.position.y = self.mu[1]
             odom.pose.pose.position.z = 0
 
-            quaternion = Quaternion()
-            quaternion.z = sin(self.mu[2]/2.0)
-            quaternion.w = cos(self.mu[2]/2.0)
-            odom.pose.pose.orientation = quaternion
+
+            quaternion = quaternion_from_euler((0,0,self.mu[2]))
+            # quaternion.z = sin(self.mu[2]/2.0)
+            # quaternion.w = cos(self.mu[2]/2.0)
+            # odom.pose.pose.orientation = quaternion
 
             odom.pose.covariance = [self.sigma_sq[0,0], 0, 0, 0, 0, 0, #uncertainty in x
                                     0, self.sigma_sq[1,1], 0, 0, 0, 0, #uncertainty in y
