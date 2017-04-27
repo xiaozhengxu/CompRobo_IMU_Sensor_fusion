@@ -57,34 +57,34 @@ class KalmanFilter(object):
 
         #noise in estimate mu, (also known as pk, the prediction error)
         self.sigma_sq = np.array([[0.1, 0, 0, 0, 0],
-        						 [0, 0.1, 0, 0, 0],
-        						 [0, 0, 0.1, 0, 0],
-        						 [0, 0, 0, 0.1, 0],
-        						 [0, 0, 0, 0, 0.1]])
+                                 [0, 0.1, 0, 0, 0],
+                                 [0, 0, 0.1, 0, 0],
+                                 [0, 0, 0, 0.1, 0],
+                                 [0, 0, 0, 0, 0.1]])
         #Initialize the measurements
         self.z_t = np.array([0, 0 ,0]) # v_odom, w_odom, w_gyro
 
         #Initializing initial odom/imu values
         self.v_odom = 0
         self.w_odom = 0
-    	self.w_imu = 0
-    	
+        self.w_imu = 0
+        
         # update step noise (also known as Q)
         # self.sigma_m_sq = rospy.get_param('~sigma_m_sq', 0.01)
         self.sigma_m_sq = np.array([[0.1, 0, 0, 0, 0],
-        						 [0, 0.1, 0, 0, 0],
-        						 [0, 0, 0.1, 0, 0],
-        						 [0, 0, 0, 0.1, 0],
-        						 [0, 0, 0, 0, 0.1]])
+                                 [0, 0.1, 0, 0, 0],
+                                 [0, 0, 0.1, 0, 0],
+                                 [0, 0, 0, 0.1, 0],
+                                 [0, 0, 0, 0, 0.1]])
         # sensor noise
         # self.sigma_z_sq = rospy.get_param('~sigma_z_sq', .1)
         self.sigma_z_sq = np.array([[0.1, 0, 0], #noise in v_odom
-        						 	[0, 1, 0], #noise in w_odom
-        						 	[0, 0, 0.03]]) #noise in w_gyro
+                                    [0, 1, 0], #noise in w_odom
+                                    [0, 0, 0.03]]) #noise in w_gyro
         
         self.H = np.array([[0, 0, 0, 1, 0],
-        				  [0, 0, 0, 0, 1],
-        				  [0, 0, 0, 0, 1]])
+                          [0, 0, 0, 0, 1],
+                          [0, 0, 0, 0, 1]])
 
         # Set up publisher to publish to combined Odom
         self.odom_pub = rospy.Publisher('combined_odom', Odometry, queue_size=1)
@@ -95,24 +95,24 @@ class KalmanFilter(object):
         self.odom_sub = rospy.Subscriber('odom', Odometry, self.odom_callback)
 
     def imu_callback(self,msg):
-    	# imu_pose = convert_pose_to_xy_and_theta(msg)
-    	self.w_imu = msg.angular_velocity.z
+        # imu_pose = convert_pose_to_xy_and_theta(msg)
+        self.w_imu = msg.angular_velocity.z
 
     def odom_callback(self,msg):
-    	# cur_pos = convert_pose_to_xy_and_theta(msg.pose.pose)
-    	# self.odom_roll = cur_pos[0]
+        # cur_pos = convert_pose_to_xy_and_theta(msg.pose.pose)
+        # self.odom_roll = cur_pos[0]
      #    self.odom_pitch = cur_pos[1]
-    	# self.odom_yaw = cur_pos[2]
-    	print 'getting odom values'
-    	self.w_odom = msg.twist.twist.angular.z
-    	self.odom_xdot = msg.twist.twist.linear.x
-    	self.odom_ydot = msg.twist.twist.linear.y
-    	self.v_odom = sqrt(self.odom_ydot**2+self.odom_ydot**2)
+        # self.odom_yaw = cur_pos[2]
+        print 'getting odom values'
+        self.w_odom = msg.twist.twist.angular.z
+        self.odom_xdot = msg.twist.twist.linear.x
+        self.odom_ydot = msg.twist.twist.linear.y
+        self.v_odom = sqrt(self.odom_ydot**2+self.odom_ydot**2)
 
     def run(self):
-    	r = rospy.Rate(20)
-    	curr_time = rospy.Time.now()
-    	last_time = curr_time
+        r = rospy.Rate(20)
+        curr_time = rospy.Time.now()
+        last_time = curr_time
         odom = Odometry(header=rospy.Header(frame_id="odom"), child_frame_id='base_link')
         while not rospy.is_shutdown():
             # Do Kalman updates
@@ -124,16 +124,16 @@ class KalmanFilter(object):
             self.z_t = np.array([self.v_odom, self.w_odom, self.w_imu]) 
             #Predict step
             self.mu = np.array([x_k + v_k*dt*cos(theta_k), #update state variables
-            					y_k + v_k*dt*sin(theta_k),
-            					   theta_k + w_k*dt,
-            					         v_k,
-            					         w_k])
+                                y_k + v_k*dt*sin(theta_k),
+                                   theta_k + w_k*dt,
+                                         v_k,
+                                         w_k])
             #The Jacobian of update model
             F_k = np.array([[1, 0, -v_k*dt*sin(theta_k), dt*cos(theta_k), 0],
-        					[0, 1, -v_k*dt*cos(theta_k), dt*sin(theta_k), 0],
-        					[0, 0, 1, 0, dt],
-        					[0, 0, 0, 1, 0],
-        					[0, 0, 0, 0, 1]])
+                            [0, 1, -v_k*dt*cos(theta_k), dt*sin(theta_k), 0],
+                            [0, 0, 1, 0, dt],
+                            [0, 0, 0, 1, 0],
+                            [0, 0, 0, 0, 1]])
             #update error in prediction
             self.sigma_sq = F_k.dot(self.sigma_sq).dot(F_k.T) + self.sigma_m_sq
 
@@ -171,15 +171,18 @@ class KalmanFilter(object):
             odom.twist.twist.angular.z = self.mu[4] 
 
             odom.twist.covariance = [self.sigma_sq[3,3], 0, 0, 0, 0, 0, #uncertainty in x_dot
-			                        0, 0, 0, 0, 0, 0, #uncertainty in y_dot
-			                        0, 0, 0, 0, 0, 0, #uncertainty in z_dot
-			                        0, 0, 0, 0, 0, 0, #uncertainty in change in roll
-			                        0, 0, 0, 0, 0, 0, #uncertainty in change in pitch
-			                        0, 0, 0, 0, 0, self.sigma_sq[4,4]] #uncertainty in change in yaw
+                                    0, 0, 0, 0, 0, 0, #uncertainty in y_dot
+                                    0, 0, 0, 0, 0, 0, #uncertainty in z_dot
+                                    0, 0, 0, 0, 0, 0, #uncertainty in change in roll
+                                    0, 0, 0, 0, 0, 0, #uncertainty in change in pitch
+                                    0, 0, 0, 0, 0, self.sigma_sq[4,4]] #uncertainty in change in yaw
 
             self.odomBroadcaster.sendTransform((self.mu[0], self.mu[1], 0), (quaternion.x, quaternion.y, quaternion.z, quaternion.w), curr_time, "base_link", "odom" )
             self.odom_pub.publish(odom)
-            r.sleep()
+            try:
+                r.sleep()
+            except rospy.exceptions.ROSTimeMovedBackwardsException:
+                print "Time went backwards. Carry on."
 
 if __name__ == '__main__':
     node = KalmanFilter()
