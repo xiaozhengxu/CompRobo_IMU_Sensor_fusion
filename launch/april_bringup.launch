@@ -1,0 +1,9 @@
+<launch>
+	<arg name="host"/>
+
+	<include file="$(find comprobo_imu_sensor_fusion)/launch/bringup.launch">
+		<arg name="host" value="$(arg host)"/>
+  	</include>
+
+  	<include file="$(find my_pf)/launch/apriltags.launch"/>
+</launch>

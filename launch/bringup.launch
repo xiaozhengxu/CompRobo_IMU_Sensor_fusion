@@ -3,7 +3,7 @@
 
 	<param name="/use_sim_time" value="false" />
 
-	<include file="$(find razor_imu_9dof)/launch/bringup.launch">
+	<include file="$(find razor_imu_9dof)/launch/razor.launch">
 		<arg name="host" value="$(arg host)"/>
   	</include>
 
