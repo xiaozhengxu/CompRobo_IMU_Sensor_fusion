@@ -12,7 +12,7 @@
     <node pkg="rosbag" type="play" name="player"
         args="--clock $(arg path)$(arg bag) -l --rate=$(arg rate)"/>
 
-    <node name="localizer_node" pkg="comprobo_imu_sensor_fusion"
+    <node name="kalman_filter" pkg="comprobo_imu_sensor_fusion"
         type="kalman_filter.py" output="screen" />
 
 </launch>

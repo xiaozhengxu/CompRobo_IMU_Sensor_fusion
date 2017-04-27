@@ -1,0 +1,13 @@
+<launch>
+	<arg name="host"/>
+
+	<param name="/use_sim_time" value="false" />
+
+	<include file="$(find razor_imu_9dof)/launch/bringup.launch">
+		<arg name="host" value="$(arg host)"/>
+  	</include>
+
+	<node name="kalman_filter" pkg="comprobo_imu_sensor_fusion"
+        type="kalman_filter.py" output="screen" />
+
+</launch>
