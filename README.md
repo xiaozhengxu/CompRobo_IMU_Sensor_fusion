@@ -33,7 +33,8 @@ April 14th, 2017
 
 # Phase 2
 This week we read through a useful, easy to read tutorial explaining the extended kalman filter. https://home.wlu.edu/~levys/kalman_tutorial/
-Then we implemented an extended kalman filter based on a simple model, using the standard extended kalman filter formua:
+
+Then we implemented an extended kalman filter based on a simple model, using the standard extended kalman filter formula found from the tutorial:
 ![kalman filter model](media/kalman_update_model.PNG)
 
 The model is based on the state variables x_k = [x,y,theta, v, w], and 
