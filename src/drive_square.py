@@ -4,6 +4,7 @@
 
 import rospy
 import math
+from math import sin, cos
 from geometry_msgs.msg import Twist, Pose, Point
 from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion
@@ -11,7 +12,7 @@ from tf.transformations import euler_from_quaternion
 class DriveSquare(object):
 	def __init__(self):
 		rospy.init_node('drive_square')
-		rospy.Subscriber('/odom', Odometry, self.process_odom)
+		rospy.Subscriber('/combined_odom', Odometry, self.process_odom)
 		rospy.on_shutdown(self.stop)
 		self.pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
 
@@ -22,13 +23,14 @@ class DriveSquare(object):
 		self.position = Point()
 		self.goal_position = Point()
 		self.position_error = None
-		self.angle = -10
+		self.angle = 0
 		self.goal_angle = 0.0
 		self.angle_error = None
 
 		self.at_goal_angle = False
 		self.at_point = False
-	
+
+		self.odom_initialized = False
 
 	def process_odom(self, msg):
 		self.position.x = msg.pose.pose.position.x
@@ -37,9 +39,11 @@ class DriveSquare(object):
 		angles = euler_from_quaternion(orientation_tuple)
 		self.angle = angles[2]
 
+		self.odom_initialized = True
+
 	def calculate_angle_error(self):
 		self.angle_error = -self.angle_diff(self.angle, self.goal_angle)
-		print "angle error: " + str(self.angle_error) + "   angle: " + str(self.angle) + "   goal: " + str(self.goal_angle)
+		# print "angle error: " + str(self.angle_error) + "   angle: " + str(self.angle) + "   goal: " + str(self.goal_angle)
 		if math.fabs(self.angle_error) < 0.05:
 			return True
 		else:
@@ -64,7 +68,7 @@ class DriveSquare(object):
 	def find_angle_twist(self):
 		twist = Twist()
 		turn_command = self.angle_error * self.angle_k
-		print "turn command: " + str(turn_command)
+		# print "turn command: " + str(turn_command)
 		twist.angular.z = turn_command
 		return twist
 
@@ -138,18 +142,32 @@ class DriveSquare(object):
 		self.at_point = False
 		print "Reached Point!"
 
-			
+	def run_square(self,side):
+		points = [(0,0,0)]*4
+		init_point = (self.position.x,self.position.y, self.angle)
+
+		print init_point
+
+		points[0] = init_point
+
+		for i in range(3):
+			points[i+1] = (points[i][0]+cos(points[i][2])*side,
+				        points[i][1]+sin(points[i][2])*side, 
+				        (points[i][2]+math.pi/2)%(2*math.pi))
+
+		for i in range(1,len(points)+1):
+		# for i in range(1,2):
+			self.run_point(points[i%4][0],points[i%4][1])
+			self.run_angle(points[i%4][2])
+
 
 if __name__ == '__main__':
 	side = 1
 	node = DriveSquare()
-	node.run_angle(0*math.pi/2)
-	node.run_point(side,0)
-	node.run_angle(1*math.pi/2)
-	node.run_point(side,side)
-	node.run_angle(2*math.pi/2)
-	node.run_point(0,side)
-	node.run_angle(3*math.pi/2)
-	node.run_point(0,0)
+	r = rospy.Rate(10)
+	while not node.odom_initialized:
+		print "Waiting for Odom"
+		r.sleep()
+	node.run_square(side)
 	print("Finished instructions.")
 

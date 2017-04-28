@@ -105,9 +105,7 @@ class KalmanFilter(object):
         # self.odom_yaw = cur_pos[2]
         #print 'getting odom values'
         self.w_odom = msg.twist.twist.angular.z
-        self.odom_xdot = msg.twist.twist.linear.x
-        self.odom_ydot = msg.twist.twist.linear.y
-        self.v_odom = sqrt(self.odom_ydot**2+self.odom_ydot**2)
+        self.v_odom = msg.twist.twist.linear.x 
 
     def run(self):
         r = rospy.Rate(20)
@@ -121,6 +119,7 @@ class KalmanFilter(object):
             last_time = curr_time
 
             x_k, y_k, theta_k, v_k, w_k = self.mu
+            print self.z_t
             self.z_t = np.array([self.v_odom, self.w_odom, self.w_imu]) 
             #Predict step
             self.mu = np.array([x_k + v_k*dt*cos(theta_k), #update state variables
