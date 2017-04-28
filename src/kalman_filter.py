@@ -103,7 +103,7 @@ class KalmanFilter(object):
         # self.odom_roll = cur_pos[0]
      #    self.odom_pitch = cur_pos[1]
         # self.odom_yaw = cur_pos[2]
-        print 'getting odom values'
+        #print 'getting odom values'
         self.w_odom = msg.twist.twist.angular.z
         self.odom_xdot = msg.twist.twist.linear.x
         self.odom_ydot = msg.twist.twist.linear.y
@@ -113,7 +113,7 @@ class KalmanFilter(object):
         r = rospy.Rate(20)
         curr_time = rospy.Time.now()
         last_time = curr_time
-        odom = Odometry(header=rospy.Header(frame_id="odom"), child_frame_id='base_link')
+        odom = Odometry(header=rospy.Header(frame_id="combined_odom"), child_frame_id='base_link')
         while not rospy.is_shutdown():
             # Do Kalman updates
             curr_time = rospy.Time.now()
@@ -155,10 +155,11 @@ class KalmanFilter(object):
             odom.pose.pose.position.z = 0
 
 
-            quaternion = quaternion_from_euler((0,0,self.mu[2]))
+            qt_array = quaternion_from_euler(0,0,self.mu[2])
+            quaternion = Quaternion(x=qt_array[0], y=qt_array[1], z=qt_array[2], w=qt_array[3])
             # quaternion.z = sin(self.mu[2]/2.0)
             # quaternion.w = cos(self.mu[2]/2.0)
-            # odom.pose.pose.orientation = quaternion
+            odom.pose.pose.orientation = quaternion
 
             odom.pose.covariance = [self.sigma_sq[0,0], 0, 0, 0, 0, 0, #uncertainty in x
                                     0, self.sigma_sq[1,1], 0, 0, 0, 0, #uncertainty in y
@@ -178,7 +179,7 @@ class KalmanFilter(object):
                                     0, 0, 0, 0, 0, 0, #uncertainty in change in pitch
                                     0, 0, 0, 0, 0, self.sigma_sq[4,4]] #uncertainty in change in yaw
 
-            self.odomBroadcaster.sendTransform((self.mu[0], self.mu[1], 0), (quaternion.x, quaternion.y, quaternion.z, quaternion.w), curr_time, "base_link", "odom" )
+            self.odomBroadcaster.sendTransform((self.mu[0], self.mu[1], 0), (quaternion.x, quaternion.y, quaternion.z, quaternion.w), curr_time, "base_link", "combined_odom" )
             self.odom_pub.publish(odom)
             try:
                 r.sleep()
