@@ -4,6 +4,41 @@ This is our final project for Computational Robotics class to incorporate a razo
 Link to website:
 https://xiaozhengxu.github.io/CompRobo_IMU_Sensor_fusion/
 
+# Phase 2
+This week we read through a useful, easy to read tutorial explaining the extended kalman filter. https://home.wlu.edu/~levys/kalman_tutorial/
+
+Then we implemented an extended kalman filter based on a simple model, using the standard extended kalman filter formula found from the tutorial:
+![kalman filter model](media/kalman_update_model.PNG)
+
+The model is based on the state variables x_k = [x,y,theta, v, w], 
+
+and z_k = [v_odom, w_odom, w_imu]. 
+
+x, y, and theta are the position and heading of the robot in the odom frame. v is its forward velocity, and w is its angular velocity (theta_dot). Motor commands were not included in the model. 
+This simple model only uses one angular rate measurement from the gyro in the imu (w_imu), and does not include the acceleration measurements from the accelerometer, nor the orientation measurements from the magnotometer. 
+
+Note that the function f(x_k) is non-linear because a change in x, y involves cos(theta)*v*dt and sin(theta)*v*dt, but the sensor function h(z_k) is linear and so can be represented as a constant matrix H_k. 
+
+Our filter has inputs from odometry based on wheel encoders, which is very noisy when the robot turns on carpet. Thus, for the noise estimate values we gave it a high covariance for w_odom. The imu measurement of angular velocity is much less noisy, varying only by 0.02. 
+
+We tried running our filter using these estimates and turning the robot in place (as in the bag files under bags/turning_180_deg) 
+
+![kalman filter model](media/simple_filter_combined_odom.png)
+
+The image shows the angular turning rate from odom measurement, imu measurement and our filter output measurement in combined_odom.
+The combined odom favored the imu measurement because of the low noise we set. If we reversed the noise amplitude for the two sensors, the combined odom would favor the odom measurement instead. 
+
+We then collected some more bag files including april tag pose estimates to validate our orientation estimate. 
+
+On the testing side we plan to re-run behaviors from the warmup project like drive square to see how accurate the combined_odom is.
+
+insert_pic_here of april tag validation 
+
+Our next steps are incorporating acceleration measurements from the imu into the kalman filter we have.
+
+April 28th, 2017
+
+
 # Phase 1
 
 This week our goal was to read IMU data from the arduino, pass it through the pi and publish the data as an IMU message on ROS. 
@@ -28,3 +63,5 @@ In order to get odometry and IMU data at the same time, we are required to run a
 We had some issues running both the neato node and IMU node at the same time, which resulted in the serial communication to both the neato and IMU failing. We’re currently resolving this by plugging in the IMU after we have started up the neato. 
 
 Now that we can access both Odometry data from the neato’s wheels and imu data, we are ready to start implementing an extended Kalman filter! 
+
+April 21st, 2017
