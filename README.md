@@ -37,10 +37,11 @@ This week we read through a useful, easy to read tutorial explaining the extende
 Then we implemented an extended kalman filter based on a simple model, using the standard extended kalman filter formula found from the tutorial:
 ![kalman filter model](media/kalman_update_model.PNG)
 
-The model is based on the state variables x_k = [x,y,theta, v, w], and 
-z_k = [v_odom, w_odom, w_imu]. 
+The model is based on the state variables x_k = [x,y,theta, v, w], 
 
-x, y, and theta position and orientation of the robot in the odom frame. v is its forward velocity, and w is its angular velocity (theta_dot). Motor commands were not included in the model. 
+and z_k = [v_odom, w_odom, w_imu]. 
+
+x, y, and theta are the position and heading of the robot in the odom frame. v is its forward velocity, and w is its angular velocity (theta_dot). Motor commands were not included in the model. 
 This simple model only uses one angular rate measurement from the gyro in the imu (w_imu), and does not include the acceleration measurements from the accelerometer, nor the orientation measurements from the magnotometer. 
 
 Note that the function f(x_k) is non-linear because a change in x, y involves cos(theta)*v*dt and sin(theta)*v*dt, but the sensor function h(z_k) is linear and so can be represented as a constant matrix H_k. 
