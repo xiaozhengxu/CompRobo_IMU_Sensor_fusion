@@ -48,7 +48,7 @@ Our filter has inputs from odometry based on wheel encoders, which is very noisy
 
 We tried running our filter using these estimates and turning the robot in place (as in the bag files under bags/turning_180_deg) 
 
-![kalman filter model](simple_filter_combined_odom.png)
+![kalman filter model](media/simple_filter_combined_odom.png)
 
 The image shows the angular turning rate from odom measurement, imu measurement and our filter output measurement in combined_odom.
 The combined odom favored the imu measurement because of the low noise we set. If we reversed the noise amplitude for the two sensors, the combined odom would favor the odom measurement instead. 
