@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 """
-    This script implements a Kalman filter to integrate IMU yaw orientation with the neato's odometry:
+    This script implements a Kalman filter to integrate IMU linear accelerations to estimate position:
     authors: Xiaozheng Xu and Riley Chapman
-    Date: April 30th, 2017
+    Date: May 2nd, 2017
     
     x_0 ~ N(0, sigma_sq)
     x_t = f(x_{t-1}) + w_t, w_t ~ N(0, sigma_m_sq)
