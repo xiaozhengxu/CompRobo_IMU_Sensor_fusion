@@ -2,9 +2,9 @@
 #include <string>
 #include <vector>
 
-#include <ros/ros.h>
-#include <sstream>
-#include <iostream>
+#include "ros/ros.h"
+//#include <sstream>
+//#include <iostream>
 
 #include <sensor_msgs/Imu.h>
 #include <nav_msgs/Odometry.h>
@@ -15,37 +15,32 @@
 #include <std_msgs/Int16MultiArray.h>
 #include <std_msgs/Float32MultiArray.h>
 
-#include <tf/tf.h>
+//#include <tf/tf.h>
 
 class KalmanFilter {
 	public:
-		ros::Publisher odom_pub;
-		ros::Subscriber imu_sub;
-		ros::Subscriber odom_sub;
-
-		KalmanFilter(ros::NodeHandle n); //This is the constructor
-
-		void imuCallback(const sensor_msgs::Imu msg){
-		}
-
-		void odomCallback(const nav_msgs::Odometry msg){
-
-		}
-
+		void imuCallback(const sensor_msgs::Imu msg);
+		void odomCallback(const nav_msgs::Odometry msg);
 };
 
-KalmanFilter::KalmanFilter(ros::NodeHandle n){
-	odom_pub = n.advertise<nav_msgs::Odometry>("combined_odom",1000);
-	imu_sub = n.subscribe("imu",1000, &KalmanFilter::imuCallback, this);
-	odom_sub = n.subscribe("odom",1000, &KalmanFilter::odomCallback, this);
-	std::cout << "initialized kalman filter";
+void KalmanFilter::imuCallback(const sensor_msgs::Imu msg){
+	ROS_INFO("IMU received");
 }
 
+void KalmanFilter::odomCallback(const nav_msgs::Odometry msg){
+	ROS_INFO("Odom received");
+}
+
+
 int main(int argc, char **argv){
-	ros::init(argc, argv,"Kalman Filter");
+	ros::init(argc, argv,"kalman_filter");
 	ros::NodeHandle n;
 	
-	KalmanFilter kf(n);
-	// KalmanFilter kf(odom_pub);
-	return 0;
+	KalmanFilter kf;
+	ros::Subscriber imu_sub = n.subscribe("imu", 1000, &KalmanFilter::imuCallback, &kf);
+	ros::Subscriber odom_sub = n.subscribe("odom", 1000, &KalmanFilter::odomCallback, &kf);
+
+	ros::spin();
+
+  	return 0;
 }

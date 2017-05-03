@@ -10,8 +10,10 @@ project(comprobo_imu_sensor_fusion)
 find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   rospy
+  roscpp
   sensor_msgs
   std_msgs
+  geometry_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -135,6 +137,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/comprobo_imu_sensor_fusion_node.cpp)
+add_executable(imu_fusion_kalman_filter src/kalman_filter.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -150,6 +153,7 @@ include_directories(
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
+target_link_libraries(imu_fusion_kalman_filter ${catkin_LIBRARIES})
 
 #############
 ## Install ##
