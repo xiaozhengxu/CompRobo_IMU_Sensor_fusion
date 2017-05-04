@@ -94,7 +94,7 @@ class KalmanFilter(object):
 
         # Set up substriber to imu and odom
         self.imu_sub = rospy.Subscriber('imu', Imu, self.imu_callback)
-        # self.odom_sub = rospy.Subscriber('odom', Odometry, self.odom_callback)
+        self.odom_sub = rospy.Subscriber('odom', Odometry, self.odom_callback)
 
         self.gyro_offset = None
 
@@ -112,6 +112,7 @@ class KalmanFilter(object):
         #print 'getting odom values'
         self.w_odom = msg.twist.twist.angular.z
         self.v_odom = msg.twist.twist.linear.x 
+        # print "V_ODOM: " + str(self.v_odom)
 
     def run(self):
         r = rospy.Rate(20)
