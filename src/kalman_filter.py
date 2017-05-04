@@ -62,26 +62,26 @@ class KalmanFilter(object):
                                  [0, 0.1, 0, 0, 0],
                                  [0, 0, 0.1, 0, 0],
                                  [0, 0, 0, 0.1, 0],
-                                 [0, 0, 0, 0, 0.1]])
-        #Initialize the measurements
-        self.z_t = np.array([0, 0 ,0]) # v_odom, w_odom, w_gyro
+                                 [0, 0, 0, 0, 0.1]])      
 
         #Initializing initial odom/imu values
         self.v_odom = 0
         self.w_odom = 0
         self.w_imu = 0
-        
+
+        self.z_t = np.array([self.v_odom, self.w_odom, self.w_imu]) 
+
         # update step noise (also known as Q)
         # self.sigma_m_sq = rospy.get_param('~sigma_m_sq', 0.01)
         self.sigma_m_sq = np.array([[0.1, 0, 0, 0, 0],
-                                 [0, 0.1, 0, 0, 0],
-                                 [0, 0, 0.1, 0, 0],
-                                 [0, 0, 0, 0.1, 0],
-                                 [0, 0, 0, 0, 0.1]])
+                                   [0, 0.1, 0, 0, 0],
+                                   [0, 0, 0.1, 0, 0],
+                                   [0, 0, 0, 0.1, 0],
+                                   [0, 0, 0, 0, 0.1]])
         # sensor noise
         # self.sigma_z_sq = rospy.get_param('~sigma_z_sq', .1)
         self.sigma_z_sq = np.array([[0.1, 0, 0], #noise in v_odom
-                                    [0, 0.3 0], #noise in w_odom
+                                    [0, 0.3, 0], #noise in w_odom
                                     [0, 0, 0.02]]) #noise in w_gyro
         
         self.H = np.array([[0, 0, 0, 1, 0],
@@ -94,13 +94,15 @@ class KalmanFilter(object):
 
         # Set up substriber to imu and odom
         self.imu_sub = rospy.Subscriber('imu', Imu, self.imu_callback)
-        self.odom_sub = rospy.Subscriber('odom', Odometry, self.odom_callback)
+        # self.odom_sub = rospy.Subscriber('odom', Odometry, self.odom_callback)
+
+        self.gyro_offset = None
 
     def imu_callback(self,msg):
         # imu_pose = convert_pose_to_xy_and_theta(msg)
-        #The offset for gyro angular velocity_z is 0.01 (when the robot is stationary), so we subtract it from each measurement below: 
-        #this is similar to what the calibration in the arduino does
-        self.w_imu = msg.angular_velocity.z-0.01 
+        if self.gyro_offset == None:
+            self.gyro_offset = msg.angular_velocity.z
+        self.w_imu = msg.angular_velocity.z-self.gyro_offset
 
     def odom_callback(self,msg):
         # cur_pos = convert_pose_to_xy_and_theta(msg.pose.pose)

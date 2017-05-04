@@ -12,7 +12,7 @@ from tf.transformations import euler_from_quaternion
 class DriveSquare(object):
 	def __init__(self):
 		rospy.init_node('drive_square')
-		rospy.Subscriber('/combined_odom', Odometry, self.process_odom)
+		rospy.Subscriber('/odom', Odometry, self.process_odom)
 		rospy.on_shutdown(self.stop)
 		self.pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
 
