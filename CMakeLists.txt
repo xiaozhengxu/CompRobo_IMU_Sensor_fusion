@@ -119,8 +119,10 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
+set(EIGEN_INC_DIR /usr/local/include/eigen)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${EIGEN_INC_DIR}
 )
 
 ## Declare a C++ library
