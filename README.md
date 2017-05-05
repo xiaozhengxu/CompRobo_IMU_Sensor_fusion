@@ -5,16 +5,16 @@ https://xiaozhengxu.github.io/CompRobo_IMU_Sensor_fusion/
 
 # Final project documentation
 
-This week we started with doing validation with april tags and running drive square on the neatos again using the combined odometry from our filter. 
+This week we started with doing validation with april tags and running drive square on the neato again using the combined odometry from our filter. 
 
-First, we had to modify our proportional control drive square program to make it run from any starting position in the odom frame. Then we faced the challenge of a drifting imu yaw. We solved this by writing the code to find the initial gyro offset (either 0.01 or -0.01), and subtract it from our gyro angular velocity_z measurements. This is the same thing as what sending a gyro offset parameter to the arduino does. (we looked into the arduino code and they also subtracted what ever the offset parameter was in each velocity_z update). 
+First, we had to modify our proportional control drive square program to make it run from any starting position in the odom frame. Then we faced the challenge of a drifting IMU yaw. We solved this by writing the code to find the initial gyro offset (either 0.01 or -0.01), and subtract it from our gyro angular velocity_z measurements. This is the same thing as what sending a gyro offset parameter to the arduino does. (we looked into the arduino code and they also subtracted what ever the offset parameter was in each velocity_z update). 
 
 After that, we were able to drive the neato in a square while disturbing during the turns. 
 If we just use the wheel's odometry this is what happens when we disturb the neato (lift it up slightly and prevent it from turning fully):
 
 ![odom_drive_square_with_disturbance](media/drive_square_with_dist_odom.gif)
 
-As you can see, the wheel odometry is not smart enough because it is solely based on how much the wheels turn. It thinks the robot has turned to an angle when the wheels turn even if the robot is not actually turning. On the other hand, it can't tell when the robot actually turned if it's wheels did not turn. An IMU measurement of angular velocity solves this problem. When we combine the angular velocity measurement from the imu, we get a much more realistic result and the neatos is able to drive in a square while being disturbed! (as shown below)
+As you can see, the wheel odometry is not smart enough because it is solely based on how much the wheels turn. It thinks the robot has turned to an angle when the wheels turn even if the robot is not actually turning. On the other hand, it can't tell when the robot actually turned if it's wheels did not turn. An IMU measurement of angular velocity solves this problem. When we combine the angular velocity measurement from the imu, we get a much more realistic result and the neato is able to drive in a square while being disturbed! (as shown below)
 
 ![drive_square_with_disturbance](media/drive_square_with_dist.gif)
 
@@ -22,9 +22,14 @@ This screen shot video below shows our filter's theta output and the odometry th
 ![combined_odom_drive_square_with_disturbance_screen](media/drive_square_with_disturbance_screen.gif)
 While the theta from Odometry is in discrete increments, the theta output from our kalman filter is smooth and accurate to the real world. 
 
-We also experimented with writing a linear kalman filter based on the IMU's acceleration measurements to get position values. This did not work out very well because there is always a z acceleration due to gravity close to 10, and that propogates to the x and y directions if the accelerometer is not exactly horizontal. This little acceleration causes the position derived from the kalman filter to increase quadraticly (up to 60,000 meters in less than 1 min). This it is very hard to get accurate position values from accelerometer. 
+These three plots show the x and y position of the robot according to three different sources as it drives a square with disturbances while turning. The first corner was untouched, so Odometry and Combined Odometry match well. There must have been an error in the april tag calibration, becuase the STAR pose arcs while turning, instead of turning in place. On the second and third corners, the robot was held for a bit while turning. The Combined Odometry, with the fused data streams of the IMU and Odometry, is able to recognize when the wheels are turning but the robot is not. The regular Odometry gets as far off as the wheels slip when the robot is held. 
 
-We also tried to implement our extended kalman filter in C++, we got to initializing all ros node, publisher and subscriber in a object oriented structure. That was much more complicated than in python and as the examples online were all in a non class structure.
+![tripple_position_plots](media/plot3.png)
+
+
+We also experimented with writing a linear kalman filter based on the IMU's acceleration measurements to get position values. This did not work out very well because there is always a z acceleration due to gravity close to 10, and that propagates to the x and y directions if the accelerometer is not exactly horizontal. This little acceleration causes the position derived from the kalman filter to increase quadratically (up to 60,000 meters in less than 1 min). This it is very hard to get accurate position values from accelerometer. 
+
+We also tried to implement our extended kalman filter in C++, we got to initializing all ROS node, publisher and subscriber in a object oriented structure. That was much more complicated than in python and as the examples online were all in a non class structure.
 
 # Phase 2
 This week we read through a useful, easy to read tutorial explaining the extended kalman filter. https://home.wlu.edu/~levys/kalman_tutorial/
@@ -37,24 +42,24 @@ The model is based on the state variables x_k = [x,y,theta, v, w],
 and z_k = [v_odom, w_odom, w_imu]. 
 
 x, y, and theta are the position and heading of the robot in the odom frame. v is its forward velocity, and w is its angular velocity (theta_dot). Motor commands were not included in the model. 
-This simple model only uses one angular rate measurement from the gyro in the imu (w_imu), and does not include the acceleration measurements from the accelerometer, nor the orientation measurements from the magnotometer. 
+This simple model only uses one angular rate measurement from the gyro in the imu (w_imu), and does not include the acceleration measurements from the accelerometer, nor the orientation measurements from the magnetometer. 
 
 Note that the function f(x_k) is non-linear because a change in x, y involves cos(theta)*v*dt and sin(theta)*v*dt, but the sensor function h(z_k) is linear and so can be represented as a constant matrix H_k. 
 
-Our filter has inputs from odometry based on wheel encoders, which is very noisy when the robot turns on carpet. Thus, for the noise estimate values we gave it a high covariance for w_odom. The imu measurement of angular velocity is much less noisy, varying only by 0.02. 
+Our filter has inputs from odometry based on wheel encoders, which is very noisy when the robot turns on carpet. Thus, for the noise estimate values we gave it a high covariance for w_odom. The IMU measurement of angular velocity is much less noisy, varying only by 0.02. 
 
 We tried running our filter using these estimates and turning the robot in place (as in the bag files under bags/turning_180_deg) 
 
 ![kalman filter model](media/simple_filter_combined_odom.png)
 
-The image shows the angular turning rate from odom measurement, imu measurement and our filter output measurement in combined_odom.
-The combined odom favored the imu measurement because of the low noise we set. If we reversed the noise amplitude for the two sensors, the combined odom would favor the odom measurement instead. 
+The image shows the angular turning rate from odom measurement, IMU measurement and our filter output measurement in combined_odom.
+The combined odom favored the IMU measurement because of the low noise we set. If we reversed the noise amplitude for the two sensors, the combined odom would favor the odom measurement instead. 
 
 We then collected some more bag files including april tag pose estimates to validate our orientation estimate. 
 
 On the testing side we plan to re-run behaviors from the warmup project like drive square to see how accurate the combined_odom is.
 
-Our next steps are incorporating acceleration measurements from the imu into the kalman filter we have.
+Our next steps are incorporating acceleration measurements from the IMU into the kalman filter we have.
 
 April 28th, 2017
 
