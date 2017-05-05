@@ -1,9 +1,10 @@
 # IMU Sensor Fusion
-This is our final project for Computational Robotics class to incorporate a razor IMU sensor to improve the neato's wheel odometry. 
+This is our final project for Computational Robotics class to implement sensor fusion between a razor IMU and the neato's wheel odometry.
 Link to website:
 https://xiaozhengxu.github.io/CompRobo_IMU_Sensor_fusion/
 
-For documentation on how to set up packages and run our code, see Wiki home page.
+For documentation on how to set up packages and run our code, see Wiki home page:
+https://github.com/xiaozhengxu/CompRobo_IMU_Sensor_fusion/wiki
 
 # Final Phase
 
