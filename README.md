@@ -3,7 +3,9 @@ This is our final project for Computational Robotics class to incorporate a razo
 Link to website:
 https://xiaozhengxu.github.io/CompRobo_IMU_Sensor_fusion/
 
-# Final project documentation
+For documentation on how to set up packages and run our code, see Wiki home page.
+
+# Final Phase
 
 This week we started with doing validation with april tags and running drive square on the neato again using the combined odometry from our filter. 
 
@@ -26,10 +28,9 @@ These three plots show the x and y position of the robot according to three diff
 
 ![tripple_position_plots](media/plot3.png)
 
-
 We also experimented with writing a linear kalman filter based on the IMU's acceleration measurements to get position values. This did not work out very well because there is always a z acceleration due to gravity close to 10, and that propagates to the x and y directions if the accelerometer is not exactly horizontal. This little acceleration causes the position derived from the kalman filter to increase quadratically (up to 60,000 meters in less than 1 min). This it is very hard to get accurate position values from accelerometer. 
 
-We also tried to implement our extended kalman filter in C++, we got to initializing all ROS node, publisher and subscriber in a object oriented structure. That was much more complicated than in python and as the examples online were all in a non class structure.
+We also tried to implement our extended kalman filter in C++, we got to initializing all ROS node, publisher and subscriber in a object oriented structure. That was much more complicated than in python and as the examples online were all in a non class structure. We then looked into the C++ equivalent of numpy: the Eigen module, and found a C++ example of extended kalman filter on github. However, we did not have enough time to finish a complete implementation of our EKF in C++. 
 
 # Phase 2
 This week we read through a useful, easy to read tutorial explaining the extended kalman filter. https://home.wlu.edu/~levys/kalman_tutorial/
